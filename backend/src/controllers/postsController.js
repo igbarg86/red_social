@@ -33,3 +33,52 @@ export const createPost = async (req, res) => {
     res.status(500).json({ message: 'Error al crear el post' })
   }
 }
+
+// RUTA PUT
+
+export const likePost = async (req, res) => {
+  const { id } = req.params
+
+  const sqlQuery = {
+    text: 'UPDATE posts SET likes = likes + 1 WHERE id = $1 RETURNING *',
+    values: [id]
+  }
+
+  try {
+    const result = await pool.query(sqlQuery)
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Post no encontrado' })
+    }
+
+    res.json(result.rows[0])
+  } catch (error) {
+    console.error('Error al dar like:', error)
+    res.status(500).json({ message: 'Error al dar like al post' })
+  }
+}
+
+// RUTA DELETE
+
+export const deletePost = async (req, res) => {
+  const { id } = req.params
+
+  const sqlQuery = {
+    text: 'DELETE FROM posts WHERE id = $1 RETURNING *',
+    values: [id]
+  }
+
+  try {
+    const result = await pool.query(sqlQuery)
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Post no encontrado' })
+    }
+
+    res.json({ message: 'Post eliminado', post: result.rows[0] })
+  } catch (error) {
+    console.error('Error al eliminar el post:', error)
+    res.status(500).json({ message: 'Error al eliminar el post' })
+  }
+}
+
